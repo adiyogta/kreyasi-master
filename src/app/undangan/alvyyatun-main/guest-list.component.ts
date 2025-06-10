@@ -10,9 +10,9 @@ import {
   ViewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { HttpClientModule, HttpClient, HttpErrorResponse } from '@angular/common/http';
+import { HttpClientModule, HttpClient, HttpErrorResponse, HttpHeaders } from '@angular/common/http';
 import { interval, Subscription, BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import { switchMap, catchError, tap, take, distinctUntilChanged, map, first, debounceTime } from 'rxjs/operators';
+import { switchMap, catchError, tap, take, distinctUntilChanged, map, first, debounceTime, retry } from 'rxjs/operators';
 import { trigger, transition, style, animate } from '@angular/animations';
 import { toSignal } from '@angular/core/rxjs-interop';
 
@@ -45,6 +45,8 @@ interface Guest {
             <span *ngIf="!isLoading">🔄</span>
             <span class="ml-1">{{ isLoading ? 'Memuat...' : 'Refresh Ucapan' }}</span>
           </button>
+          <!-- Debug info - hapus setelah testing -->
+          <p class="text-xs text-gray-500 mt-1">Last updated: {{ lastUpdateTime | date:'HH:mm:ss' }}</p>
         </div>
 
         <!-- Pull to Refresh Indicator -->
@@ -70,7 +72,7 @@ interface Guest {
 
             <!-- Guest List -->
             <div *ngIf="guests().length > 0" class="grid grid-cols-1 gap-6">
-              @for (guest of guests(); track guest.nama) {
+              @for (guest of guests(); track guest.nama + guest.timestamp) {
                 <div class="bg-white shadow-lg rounded-xl p-4 md:p-6" @fadeIn>
                   <div class="flex items-center justify-start mb-2">
                     <h3 class="text-md font-semibold text-gray-800 truncate">{{ guest.nama }}</h3>
@@ -96,6 +98,7 @@ interface Guest {
           <!-- Error Message -->
           <div *ngIf="error" class="text-red-500 text-center p-4">
             {{ error }}
+            <button (click)="clearError()" class="ml-2 text-blue-500 underline">Coba Lagi</button>
           </div>
         </div>
       </div>
@@ -155,6 +158,7 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
   error: string | null = null;
   isLoading = false;
   isPulling = false;
+  lastUpdateTime = new Date();
   private updateSubscription?: Subscription;
   private refreshSubject = new Subject<void>();
   private refreshSubscription?: Subscription;
@@ -201,6 +205,11 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.refreshSubject.next();
   }
 
+  clearError(): void {
+    this.error = null;
+    this.loadGuests();
+  }
+
   // Pull to refresh implementation
   onTouchStart(event: TouchEvent): void {
     this.touchStartY = event.touches[0].clientY;
@@ -238,15 +247,20 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
     if (this.isLoading) return; // Prevent concurrent requests
     
     this.isLoading = true;
+    this.error = null;
+    
     this.fetchGuests().pipe(
+      retry(2), // Retry 2 times on failure
       tap(guests => {
         this.updateGuestList(guests);
         this.error = null;
         this.isLoading = false;
+        this.lastUpdateTime = new Date();
         this.cdr.detectChanges();
       }),
       catchError(err => {
-        this.error = 'Gagal memuat data';
+        console.error('Load guests error:', err);
+        this.error = 'Gagal memuat data. Periksa koneksi internet Anda.';
         this.isLoading = false;
         this.cdr.detectChanges();
         return of([]);
@@ -255,39 +269,66 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private startAutoRefresh(): void {
-    // Reduced interval to 30 seconds to save resources
-    this.updateSubscription = interval(30000).pipe(
+    // Reduced interval to 15 seconds for more frequent updates
+    this.updateSubscription = interval(15000).pipe(
       switchMap(() => {
         if (this.isLoading) return of([]); // Skip if already loading
-        return this.fetchGuests();
-      }),
-      catchError(error => {
-        console.error('Error refreshing guests:', error);
-        return of([]);
+        return this.fetchGuests().pipe(
+          retry(1), // Retry once for auto refresh
+          catchError(error => {
+            console.error('Auto refresh error:', error);
+            return of([]);
+          })
+        );
       })
     ).subscribe(guests => {
-      if (guests.length > 0) {
+      if (guests.length >= 0) { // Allow empty arrays to update
         this.updateGuestList(guests);
         this.error = null;
+        this.lastUpdateTime = new Date();
         this.cdr.detectChanges();
       }
     });
   }
 
   private fetchGuests(): Observable<Guest[]> {
-    // Add timestamp to prevent caching
-    const url = `${this.apiUrl}?t=${Date.now()}`;
-    return this.http.get<{ data: Guest[] }>(url).pipe(
-      map(response => response.data),
+    // Multiple cache-busting strategies
+    const timestamp = Date.now();
+    const randomParam = Math.random().toString(36).substring(7);
+    const url = `${this.apiUrl}?t=${timestamp}&r=${randomParam}&_cb=${timestamp}`;
+    
+    // Headers to prevent caching
+    const headers = new HttpHeaders({
+      'Cache-Control': 'no-cache, no-store, must-revalidate',
+      'Pragma': 'no-cache',
+      'Expires': '0'
+    });
+
+    console.log('Fetching from URL:', url); // Debug log
+    
+    return this.http.get<{ data: Guest[] }>(url, { headers }).pipe(
+      map(response => {
+        console.log('API Response:', response); // Debug log
+        return response.data || [];
+      }),
       catchError(error => {
-        console.error('API Error:', error);
-        return of([]);
+        console.error('API Error Details:', error);
+        throw error;
       })
     );
   }
 
   private updateGuestList(newGuests: Guest[]): void {
-    const reversedGuests = newGuests.map(guest => ({ ...guest, timestamp: Date.now() })).reverse();
+    // Add unique timestamp to each guest for better tracking
+    const guestsWithTimestamp = newGuests.map((guest, index) => ({ 
+      ...guest, 
+      timestamp: Date.now() + index // Ensure unique timestamps
+    }));
+    
+    // Reverse to show newest first
+    const reversedGuests = guestsWithTimestamp.reverse();
+    
+    console.log('Updating guest list with:', reversedGuests.length, 'guests'); // Debug log
     this.guestsSubject.next(reversedGuests);
   }
 }
