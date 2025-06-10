@@ -38,7 +38,7 @@ interface TimeLeft {
 export class AlvyyatunMainComponent2 implements OnInit, OnDestroy{
   private platformId = inject(PLATFORM_ID);
   private intervalId: number | null = null;
-  private readonly targetDate = new Date('2025-06-25T10:00:00+07:00'); // Sesuai dengan tanggal akad
+  private readonly targetDate = new Date('2025-06-23T10:00:00+07:00'); // Sesuai dengan tanggal akad
   guestName: string | null = "Nama Tamu";
   isPlaying = true;
   isOlderIphone = false;
