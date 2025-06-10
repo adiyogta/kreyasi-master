@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="en" class="scroll-smooth focus:scroll-auto">
+<head>
+  <meta charset="utf-8">
+  <title>Kreyasi</title>
+  <base href="/">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/png" href="https://res.cloudinary.com/dxeyja0ob/image/upload/v1728580864/ascascscscscs_nqhljg.png">
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"
+  />
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+
+  <script src="node_modules/core-js/features/promise.js"></script>
+  <script src="https://unpkg.com/whatwg-fetch@3.0.0/dist/fetch.umd.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/zone.js@0.11.4/bundles/zone.umd.min.js"></script>
+
+
+  <script>
+    // Polyfill for Web Animations API
+    if (!('animate' in document.documentElement) || (navigator && /iPhone OS (8|9|10|11|12|13)_/.test(navigator.userAgent))) {
+      const script = document.createElement('script');
+      script.src = 'https://cdn.jsdelivr.net/npm/web-animations-js@2.3.2';
+      document.head.appendChild(script);
+    }
+  </script>
+</head>
+<body class="mat-typography">
+  <app-root></app-root>
+</body>
+</html>

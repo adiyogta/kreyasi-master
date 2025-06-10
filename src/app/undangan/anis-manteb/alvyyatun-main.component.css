@@ -1,0 +1,112 @@
+@keyframes a{from{opacity:0;transform:translate3d(0,50px,0)}to{opacity:1;transform:none}}
+@keyframes b{from{opacity:0;transform:translate3d(-50px,0,0)}to{opacity:1;transform:none}}
+@keyframes c{from{opacity:0;transform:translate3d(50px,0,0)}to{opacity:1;transform:none}}
+@keyframes d{from{opacity:0;transform:scale3d(.5,.5,.5)}to{opacity:1;transform:none}}
+@keyframes f{0%,20%,40%,60%,80%,to{animation-timing-function:cubic-bezier(.215,.61,.355,1)}0%{opacity:0;transform:scale3d(.3,.3,.3)}20%{transform:scale3d(1.1,1.1,1.1)}40%{transform:scale3d(.9,.9,.9)}60%{opacity:1;transform:scale3d(1.03,1.03,1.03)}80%{transform:scale3d(.97,.97,.97)}to{opacity:1;transform:none}}
+
+.animate{animation:1s both}
+.fadeInUp.animate{animation-name:a}
+.fadeInLeft.animate{animation-name:b}
+.fadeInRight.animate{animation-name:c}
+.zoomIn.animate{animation-name:d}
+.bounceIn.animate{animation-name:f;animation-duration:1.25s}
+[appScrollAnimation]{opacity:0}
+.bg-dual {  position: relative;  background-color: rgba(131, 144, 111, 0.55);
+  background-position: center;
+  image-rendering: optimizeQuality;
+}
+
+.bg-img {
+    background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749559530/batik_jawa_jbm2ba.png');
+    background-size: cover;
+    background-blend-mode: soft-light;
+    background-position: center;
+  }
+  .bg-img2 {
+    background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749559530/batik_jawa_jbm2ba.png');
+    background-size: cover;
+    background-blend-mode: multiply;
+    background-position: center;
+  }
+
+  .bg-img3 {
+    background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749561956/flower_169_2_bld4vt.png'),
+    url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749559531/flower_2_oommzk.png');
+    background-size: cover,cover;
+    background-repeat: no-repeat;
+    background-blend-mode: multiply;
+    background-position: bottom , top ;
+    /* Atau gunakan pixel values untuk kontrol yang lebih presisi */
+    /* background-position: calc(0% - 20px) calc(100% + 15px), calc(100% + 10px) calc(0% - 25px); */
+}
+
+.bg-img4 {
+  background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749561956/flower_169_2_bld4vt.png'),
+  url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749559531/flower_2_oommzk.png');
+  background-size: cover,contain;
+  background-repeat: no-repeat;
+  background-blend-mode: multiply;
+  background-position: bottom , top ;
+  /* Atau gunakan pixel values untuk kontrol yang lebih presisi */
+  /* background-position: calc(0% - 20px) calc(100% + 15px), calc(100% + 10px) calc(0% - 25px); */
+}
+
+  .bg-card {
+    position: relative;
+    background-image: url('https://media.giphy.com/media/dlwGsKqnL4yCnScx2h/giphy.gif');
+    background-size: 95%;
+    background-blend-mode: color;
+    background-repeat: no-repeat;
+    background-position: top, top;}
+
+    .bg-card-2 {
+      position: relative;
+      background-image: 
+      linear-gradient(rgba(241,239,228, 0.8), rgba(241,239,228, 0.8)),
+      url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749561955/flower_169_1_zfapm7.png'),
+      url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749561956/flower_169_2_bld4vt.png');
+      background-position: center;
+      image-rendering: optimizeQuality;
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-position: center, center;
+      opacity: 1;
+    }
+    .skeleton-loader {
+      position: relative;
+      overflow: hidden;
+      background-color: #e2e2e2;
+    }
+    
+    .skeleton-loader::after {
+      content: "";
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      transform: translateX(-100%);
+      background-image: linear-gradient(
+        90deg,
+        rgba(255, 255, 255, 0) 0,
+        rgba(255, 255, 255, 0.2) 20%,
+        rgba(255, 255, 255, 0.5) 60%,
+        rgba(255, 255, 255, 0)
+      );
+      animation: shimmer 2s infinite;
+    }
+    
+    @keyframes shimmer {
+      100% {
+        transform: translateX(100%);
+      }
+    }
+    
+    .img-loading {
+      opacity: 0;
+      transition: opacity 0.3s ease-in;
+    }
+    
+    .img-loaded {
+      opacity: 1;
+    }
