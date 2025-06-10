@@ -21,12 +21,11 @@
     
     </div>
     <div class="absolute top-3/4 left-1/2 transform -translate-x-1/2">
-      <div class="skeleton-loader w-12 md:w-24 h-12 md:h-24 rounded"></div>
+      <div class=" w-12 md:w-24 h-12 md:h-24 rounded"></div>
       <img 
         src="https://static.wixstatic.com/media/76d2f5_9bdd4d0081d941a2b3db9c18474d1ac3~mv2.gif"
         alt="flower decoration" style="mix-blend-mode: multiply;"
-        class="w-12 md:w-24 h-auto img-loading"
-        (load)="onImageLoad($event)"
+        class="w-12 md:w-24 h-auto "
       />
     </div>
   </section>
@@ -36,12 +35,11 @@
     <div class="flex flex-col md:flex-row items-center justify-center w-full max-w-7xl relative container">
       <div class="flex flex-col lg:flex-row items-center justify-center w-full max-w-7xl relative container">
         <div class="w-6/12 md:w-2/2 mb-8 lg:mb-0 lg:mr-8 opacity-0" #animatedItem>
-          <div class="skeleton-loader w-full h-0 pb-[75%] rounded-lg"></div>
+          <div class=" w-full h-0 pb-[75%] rounded-lg"></div>
           <img 
             src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749507488/IMG_8162_-_Anis_Setianingsih_ljxeqc.jpg" 
             alt="Pre-wedding photo" 
-            class="w-full h-auto rounded-lg shadow-lg img-loading" 
-            (load)="onImageLoad($event)"
+            class="w-full h-auto rounded-lg shadow-lg "
           >
         </div>
       
@@ -66,12 +64,11 @@
         <div class=" grid grid-cols-1 md:grid-cols-3 gap-2 items-center mb-4">
             <!-- Card 1 -->
             <div class="p-2 text-center bg-card opacity-0" #animatedItem >
-              <div class="skeleton-loader w-2/3 md:w-3/4 h-0 pb-[75%] rounded-full mx-auto mb-8 md:mb-16"></div>
+              <div class=" w-2/3 md:w-3/4 h-0 pb-[75%] rounded-full mx-auto mb-8 md:mb-16"></div>
               <img 
                 src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749506994/anis_ez7lt8.jpg" 
                 alt="Foto Profil Alvyyatun" 
-                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md img-loading" 
-                (load)="onImageLoad($event)"
+                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md "
               >
                 <h2 class="text-4xl md:text-6xl font-script mb-2 text-[#432818] opacity-0" #animatedItem>Anis</h2>
                 <h3 class="text-2xl md:text-3xl  font-script mb-2 opacity-0" #animatedItem>Anis Setia Ningsih, S.Pd</h3>
@@ -84,12 +81,11 @@
             </div>
             <!-- Card 2 -->
             <div class="p-2 text-center bg-card opacity-0" #animatedItem >
-              <div class="skeleton-loader w-2/3 md:w-3/4 h-0 pb-[75%] rounded-full mx-auto mb-8 md:mb-16"></div>
+              <div class=" w-2/3 md:w-3/4 h-0 pb-[75%] rounded-full mx-auto mb-8 md:mb-16"></div>
               <img 
                 src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749506993/mantep_vagk41.jpg" 
                 alt="Foto Profil Mantep" 
-                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md img-loading" 
-                (load)="onImageLoad($event)"
+                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md "
               >
                 <h2 class="text-4xl md:text-6xl font-script mb-2 text-[#432818] opacity-0" #animatedItem>Mantep</h2>
                 <h3 class="text-2xl md:text-3xl  font-script mb-2 opacity-0" #animatedItem>Mantep Supriyanto</h3>
@@ -153,12 +149,11 @@
   [class.md:col-span-2]="last && shouldLastImageSpan()"
   (click)="openModal(i)"
 >
-  <div class="skeleton-loader w-full h-full rounded-lg"></div>
+  <div class=" w-full h-full rounded-lg"></div>
   <img 
     [src]="photo.thumbnail" 
     [alt]="photo.title" 
-    class="w-full h-full object-cover rounded-lg img-loading"
-    (load)="onImageLoad($event)"
+    class="w-full h-full object-cover rounded-lg "
     decoding="async"
     fetchpriority="low"
   >
@@ -321,12 +316,11 @@
   <div class="bg-card-2 bg-opacity-80 w-full px-4 md:px-8 py-2 md:py-16 flex-col mx-auto">
     <div class=" container mx-auto flex flex-col min-h-screen items-center justify-center text-center">
       <div class=" mb-4 md:mb-6 p-2 md:p-4">
-        <div class="skeleton-loader w-full aspect-[4/3] rounded-lg max-h-[80vh] md:max-h-[60vh]"></div>
+        <div class=" w-full aspect-[4/3] rounded-lg max-h-[80vh] md:max-h-[60vh]"></div>
         <img 
           src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749507488/IMG_8145_-_Anis_Setianingsih_a1f24h.jpg" 
           alt="Pre-wedding photo" 
-          class="w-full aspect-[4/3] object-cover rounded-lg shadow-lg opacity-0 max-h-[80vh] md:max-h-[60vh] img-loading" 
-          (load)="onImageLoad($event)" 
+          class="w-full aspect-[4/3] object-cover rounded-lg shadow-lg opacity-0 max-h-[80vh] md:max-h-[60vh] " 
           #animatedItem
         >
        </div>
