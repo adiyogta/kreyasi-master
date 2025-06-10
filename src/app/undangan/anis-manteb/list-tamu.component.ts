@@ -1,9 +1,9 @@
-import { Component, OnInit, OnDestroy, ApplicationRef, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, OnDestroy, ApplicationRef, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { HttpClientModule, HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { FormsModule } from '@angular/forms';
 import { interval, Subscription, BehaviorSubject, Observable, of } from 'rxjs';
-import { switchMap, catchError, tap, first } from 'rxjs/operators';
+import { switchMap, catchError, tap, first, map } from 'rxjs/operators';
 import { trigger, transition, style, animate } from '@angular/animations';
 
 interface Guest {
@@ -21,30 +21,51 @@ interface Guest {
     <div class="bg-[#FEFBE8] bg-card-2 py-6 px-2 md:px-4 rounded-xl mb-8">
       <div class="max-w-lg mx-auto">
         <div class="text-center mb-2">
-          <h2 class="text-3xl font-semibold text-amber-900 mb-2 font-serif mb-8">Buat List Tamu Unduh Mantu</h2>
+          <h2 class="text-3xl font-semibold text-amber-900 mb-2 font-serif mb-8">Buat List Tamu</h2>
         </div>
         <form (ngSubmit)="submitForm()" class="max-w-6xl mx-auto bg-[#58010F] shadow-xl rounded-lg p-8 text-white text-center">
           <div class="relative mb-6">
             <label for="nama" class="block mb-2 text-sm font-medium text-white">Nama</label>
-            <input type="text" id="nama" name="nama" [(ngModel)]="guest.nama" (input)="generateLink()" required placeholder="Monggo dipun isi..." class="w-full bg-white rounded border-gray-300 text-gray-700 py-2 px-3"/>
+            <input type="text" id="nama" name="nama" [(ngModel)]="guest.nama" (input)="generateLink()" required placeholder="Silahkan diisi nama tamu" class="w-full bg-white rounded border-gray-300 text-gray-700 py-2 px-3"/>
           </div>
 
           <div class="relative mb-6">
-  <label class="flex mb-2 text-sm font-medium text-white">Preview Link</label>
-  <textarea readonly class="w-full h-32 bg-white rounded border-gray-300 text-gray-700 py-2 px-3" 
-    [value]="guest.link || 'Link akan muncul di sini...'"></textarea>
-</div>
+            <label class="flex mb-2 text-sm font-medium text-white">Preview Link</label>
+            <textarea readonly class="w-full h-32 bg-white rounded border-gray-300 text-gray-700 py-2 px-3" 
+              [value]="guest.link || 'Link akan muncul di sini...'"></textarea>
+          </div>
     
-          <button type="submit" class="w-full font-semibold text-[#58010F] py-3 px-4 rounded-full bg-[#FEFBE8] hover:bg-[#FEFBE8]/40 transition duration-300">Kirim</button>
+          <button type="submit" [disabled]="isSubmitting" class="w-full font-semibold text-[#58010F] py-3 px-4 rounded-full bg-[#FEFBE8] hover:bg-[#FEFBE8]/40 transition duration-300 disabled:opacity-50">
+            {{ isSubmitting ? 'Mengirim...' : 'Kirim' }}
+          </button>
         </form>
       </div>
     </div>
 
     <!-- Guest List Section -->
     <div class="bg-[#F7BE84] bg-card-2 rounded-xl p-6 shadow-inner mx-auto">
-    <div class="text-center mb-2">
-          <h2 class="text-3xl font-semibold text-amber-900 mb-2 font-serif mb-8">List Tamu</h2>
+      <div class="text-center mb-2">
+        <h2 class="text-3xl font-semibold text-amber-900 mb-2 font-serif mb-8">List Tamu</h2>
+        <!-- Debug info - hapus setelah testing -->
+        <p class="text-xs text-gray-600 mb-2">Last updated: {{ lastUpdateTime | date:'HH:mm:ss' }}</p>
+        <!-- Tombol Refresh Manual -->
+        <button 
+          (click)="refreshGuests()" 
+          [disabled]="isLoading"
+          class="bg-[#58010F] hover:bg-[#6A4E35] text-white font-semibold py-1 px-3 rounded text-sm transition duration-300 mb-4">
+          {{ isLoading ? 'Memuat...' : '🔄 Refresh' }}
+        </button>
+      </div>
+      
+      <!-- Loading Indicator -->
+      <div *ngIf="isLoading" class="flex justify-center items-center mb-4">
+        <div class="loader-dots flex space-x-1">
+          <div class="h-2 w-2 bg-[#58010F] rounded-full animate-bounce"></div>
+          <div class="h-2 w-2 bg-[#58010F] rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+          <div class="h-2 w-2 bg-[#58010F] rounded-full animate-bounce" style="animation-delay: 0.4s"></div>
         </div>
+      </div>
+
       <div class="h-[70vh] overflow-y-auto pr-2 custom-scrollbar">
         <ng-container *ngIf="guests$ | async as guestList">
           <div *ngIf="guestList.length === 0 && !error" class="bg-[#F7BE84]/50 rounded-full text-[#58010F] text-center p-2">
@@ -57,19 +78,25 @@ interface Guest {
               </div>
               <p class="text-gray-600 text-sm italic mb-2 text-wrap">{{ guest.link }}</p>
               <button 
-   (click)="copyToClipboard(guest.nama, guest.link)"
-   class="bg-gray-100 hover:bg-gray-300 font-bold text-blue-500 px-2 py-1 rounded text-xs sm:text-sm">
-   Copy Link
-</button>
+                (click)="copyToClipboard(guest.nama, guest.link)"
+                class="bg-gray-100 hover:bg-gray-300 font-bold text-blue-500 px-2 py-1 rounded text-xs sm:text-sm">
+                Copy Link
+              </button>
             </div>
           </div>
         </ng-container>
-        <div *ngIf="error" class="text-red-500 text-center p-4">{{ error }}</div>
+        
+        <div *ngIf="error" class="text-red-500 text-center p-4">
+          {{ error }}
+          <button (click)="clearError()" class="ml-2 text-blue-500 underline">Coba Lagi</button>
+        </div>
       </div>
     </div>
+    
     <div *ngIf="showToast" class="fixed top-1/2 transform -translate-y-1/2 left-1/2 transform -translate-x-1/2 items-center bg-opacity-80 justify-center text-center p-3 text-white rounded shadow-lg text-sm sm:text-base" [ngClass]="toastBackground">
       {{ toastMessage}}
     </div>
+    
     <!-- Modal -->
     <div *ngIf="isModalOpen" class="fixed inset-0 bg-gray-600 bg-opacity-50 flex items-center justify-center z-50 text-center">
       <div class="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
@@ -104,6 +131,18 @@ interface Guest {
         opacity: 1;
       }
       
+      @keyframes pulse {
+        0%, 100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.5;
+        }
+      }
+
+      .animate-pulse {
+        animation: pulse 1.5s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+      }
       `
   ],
   animations: [
@@ -111,11 +150,14 @@ interface Guest {
   ]
 })
 export class GuestManagementComponent2 implements OnInit, OnDestroy {
-    guest: Guest = { nama: '', link: '' }; // hanya ada nama dan link
+    guest: Guest = { nama: '', link: '' };
     private guestsSubject = new BehaviorSubject<Guest[]>([]);
     guests$: Observable<Guest[]> = this.guestsSubject.asObservable();
     error: string | null = null;
-    private updateSubscription!: Subscription;
+    isLoading = false;
+    isSubmitting = false;
+    lastUpdateTime = new Date();
+    private updateSubscription?: Subscription;
     private readonly SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAWLqtaCFWtAGSuZLFjkQsdFidLMd49mwH815xq5gn61NwdnCoAm5DNwEcNWCSgPHk/exec';
   
     isModalOpen = false;
@@ -123,19 +165,26 @@ export class GuestManagementComponent2 implements OnInit, OnDestroy {
     modalMessage = '';
   
     @Output() formSubmitted = new EventEmitter<void>();
-  
-    constructor(private http: HttpClient, private applicationRef: ApplicationRef) {}
-// asdsd
 
-copyToClipboard(nama: string, link: string) {
-    const message = `
+    showToast = false;
+    toastMessage = '';
+    toastBackground = '';
+  
+    constructor(
+      private http: HttpClient, 
+      private applicationRef: ApplicationRef,
+      private cdr: ChangeDetectorRef
+    ) {}
+
+    copyToClipboard(nama: string, link: string) {
+      const message = `
 Assalamu'alaikum Warahmatullahi Wabarakatuh.
 Bismillahirrahmanirrahim.
 Kepada Yth.
 Bapak/Ibu/Saudara/i
 ${nama}
 
-Dengan penuh hormat, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara pernikahan kami:
+Dengan penuh hormat, kami mengundang Bapak/Ibu/Saudara/i untuk menghadiri acara unduh mantu kami:
 Anis & Mantep
   
 Informasi lengkap mengenai acara dapat dilihat melalui tautan berikut:
@@ -147,134 +196,184 @@ Mohon maaf undangan ini hanya disampaikan melalui pesan ini. Terima kasih banyak
 Wassalamu'alaikum Warahmatullahi Wabarakatuh.
 Terima kasih.`;
   
-    // Gunakan clipboard API untuk menyalin teks ke clipboard
-    navigator.clipboard.writeText(message).then(
-      () => {
-        console.log('Teks undangan berhasil disalin ke clipboard!');
-        alert('Link undangan berhasil disalin ke clipboard!');
-      },
-      (err) => {
-        console.error('Gagal menyalin teks ke clipboard: ', err);
-      }
-    );
-  }
-
-      showToast = false;
-      toastMessage = '';
-      toastBackground = '';
-      showToastMessage(message: string, type: string) {
-        this.toastMessage = message;
-        this.showToast = true;
-    
-        if (type === 'success') {
-          this.toastBackground = 'bg-green-500';
-        } else if (type === 'error') {
-          this.toastBackground = 'bg-red-500';
+      navigator.clipboard.writeText(message).then(
+        () => {
+          console.log('Teks undangan berhasil disalin ke clipboard!');
+          this.showToastMessage('Link undangan berhasil disalin!', 'success');
+        },
+        (err) => {
+          console.error('Gagal menyalin teks ke clipboard: ', err);
+          this.showToastMessage('Gagal menyalin link', 'error');
         }
-    
-        setTimeout(() => {
-          this.showToast = false;
-        }, 2000);
+      );
+    }
+
+    showToastMessage(message: string, type: string) {
+      this.toastMessage = message;
+      this.showToast = true;
+  
+      if (type === 'success') {
+        this.toastBackground = 'bg-green-500';
+      } else if (type === 'error') {
+        this.toastBackground = 'bg-red-500';
       }
+  
+      setTimeout(() => {
+        this.showToast = false;
+      }, 2000);
+    }
 
     generateLink() {
-        const formattedName = this.guest.nama.trim().replace(/\s+/g, '%20');
-        this.guest.link = `https://anismantep.kreyasi.my.id/unduh-mantu/${formattedName}`;
-      }
+      const formattedName = this.guest.nama.trim().replace(/\s+/g, '%20');
+      this.guest.link = `https://anismantep.kreyasi.my.id/unduh-mantu/${formattedName}`;
+    }
+
     ngOnInit() {
       this.loadGuests();
-      // Check for application stability before starting the interval
       this.applicationRef.isStable.pipe(first(isStable => isStable)).subscribe(() => {
         this.startAutoRefresh();
       });
     }
   
     ngOnDestroy() {
-      if (this.updateSubscription) {
-        this.updateSubscription.unsubscribe();
-      }
+      this.updateSubscription?.unsubscribe();
+    }
+
+    refreshGuests(): void {
+      this.loadGuests();
+    }
+
+    clearError(): void {
+      this.error = null;
+      this.loadGuests();
     }
   
     private loadGuests() {
-      this.http.get<{ data: Guest[] }>(this.SCRIPT_URL).pipe(
-        tap(response => this.updateGuestList(response.data)),
-        catchError(this.handleError.bind(this))
+      if (this.isLoading) return;
+      
+      this.isLoading = true;
+      this.error = null;
+      
+      this.fetchGuests().pipe(
+        tap(guests => {
+          this.updateGuestList(guests);
+          this.error = null;
+          this.isLoading = false;
+          this.lastUpdateTime = new Date();
+          this.cdr.detectChanges();
+        }),
+        catchError(err => {
+          console.error('Load guests error:', err);
+          this.error = `Gagal memuat data: ${err.message || 'Periksa koneksi internet'}`;
+          this.isLoading = false;
+          this.cdr.detectChanges();
+          return of([]);
+        })
       ).subscribe();
+    }
+
+    private fetchGuests(): Observable<Guest[]> {
+      // Simple cache-busting dengan timestamp
+      const timestamp = Date.now();
+      const url = `${this.SCRIPT_URL}?t=${timestamp}`;
+      
+      console.log('Fetching guests from URL:', url);
+      
+      return this.http.get<any>(url).pipe(
+        map(response => {
+          console.log('Guest API Response:', response);
+          
+          // Handle berbagai format response dari Google Apps Script
+          if (response && response.data && Array.isArray(response.data)) {
+            return response.data;
+          } else if (Array.isArray(response)) {
+            return response;
+          } else if (response && Array.isArray(response.result)) {
+            return response.result;
+          } else {
+            console.warn('Unexpected guest API response format:', response);
+            return [];
+          }
+        }),
+        catchError(error => {
+          console.error('Guest API Error Details:', error);
+          throw error;
+        })
+      );
     }
   
     private startAutoRefresh() {
-      this.updateSubscription = interval(1000).pipe(
-        switchMap(() => this.http.get<{ data: Guest[] }>(this.SCRIPT_URL).pipe(
-          catchError(error => {
-            console.error('Error refreshing guests:', error);
-            return of(null);
-          })
-        ))
-      ).subscribe(response => {
-        if (response) {
-          this.updateGuestList(response.data);
+      // Interval 30 detik untuk stabilitas
+      this.updateSubscription = interval(30000).pipe(
+        switchMap(() => {
+          if (this.isLoading) return of([]);
+          return this.fetchGuests().pipe(
+            catchError(error => {
+              console.error('Auto refresh error:', error);
+              return of([]);
+            })
+          );
+        })
+      ).subscribe(guests => {
+        if (guests.length > 0) {
+          this.updateGuestList(guests);
           this.error = null;
+          this.lastUpdateTime = new Date();
+          this.cdr.detectChanges();
         }
       });
     }
   
     private updateGuestList(newGuests: Guest[]) {
-      const currentGuests = this.guestsSubject.getValue();
-      const updatedGuests = this.mergeGuestLists(currentGuests, newGuests);
-      this.guestsSubject.next(updatedGuests);
-    }
-  
-    private mergeGuestLists(currentGuests: Guest[], newGuests: Guest[]): Guest[] {
-      const mergedGuests = [...currentGuests];
-      
-      newGuests.forEach(newGuest => {
-        const existingIndex = mergedGuests.findIndex(g => g.nama === newGuest.nama);
-        if (existingIndex === -1) {
-          mergedGuests.unshift({ ...newGuest });
-        } else {
-          mergedGuests[existingIndex] = { ...newGuest };
-        }
-      });
-  
-      return mergedGuests;
+      // Reverse untuk menampilkan yang terbaru di atas
+      const reversedGuests = [...newGuests].reverse();
+      this.guestsSubject.next(reversedGuests);
     }
   
     submitForm() {
-        if (!this.isFormValid()) {
-          this.showModal('Error', 'Data tamu tidak lengkap. Pastikan untuk mengisi semua kolom.');
-          return;
-        }
-    
-        fetch(this.SCRIPT_URL, {
-          method: 'POST',
-          mode: 'no-cors',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify(this.guest)
-        })
-        .then(response => {
-          if (response.type === 'opaque') {
-            this.handleSuccess();
-            return null;
-          }
-          return response.json();
-        })
-        .then(data => {
-          if (data) {
-            console.log('Respon dari server:', data);
-            this.handleSuccess();
-          }
-        })
-        .catch(error => {
-          console.error('Gagal mengirim data:', error);
-          this.showModal('Error', `Gagal mengirim data: ${error.message}. Silakan coba lagi nanti.`);
-        });
-        this.loadGuests();
+      if (!this.isFormValid()) {
+        this.showModal('Error', 'Data tamu tidak lengkap. Pastikan untuk mengisi semua kolom.');
+        return;
       }
+
+      if (this.isSubmitting) return;
+
+      this.isSubmitting = true;
+  
+      fetch(this.SCRIPT_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(this.guest)
+      })
+      .then(response => {
+        if (response.type === 'opaque') {
+          this.handleSuccess();
+          return null;
+        }
+        return response.json();
+      })
+      .then(data => {
+        if (data) {
+          console.log('Respon dari server:', data);
+          this.handleSuccess();
+        }
+      })
+      .catch(error => {
+        console.error('Gagal mengirim data:', error);
+        this.showModal('Error', `Gagal mengirim data: ${error.message}. Silakan coba lagi nanti.`);
+      })
+      .finally(() => {
+        this.isSubmitting = false;
+        // Refresh data setelah submit
+        setTimeout(() => this.loadGuests(), 1000);
+      });
+    }
   
     private isFormValid(): boolean {
-      return !!this.guest.nama; // hanya memeriksa nama
+      return !!this.guest.nama;
     }
   
     private handleSuccess() {
@@ -282,11 +381,6 @@ Terima kasih.`;
       this.showModal('Sukses', message);
       this.resetForm();
       this.formSubmitted.emit();
-    }
-  
-    private handleError(error: HttpErrorResponse) {
-      this.error = 'Data tidak dapat diambil. Cek koneksi Anda kembali.';
-      return of(null);
     }
   
     private showModal(title: string, message: string) {
@@ -300,7 +394,7 @@ Terima kasih.`;
     }
   
     private resetForm() {
-      this.guest = { nama: '', link: '' }; // reset hanya untuk nama dan link
+      this.guest = { nama: '', link: '' };
     }
   
     trackByName(index: number, guest: Guest): string {
