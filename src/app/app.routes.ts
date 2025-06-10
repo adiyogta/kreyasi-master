@@ -39,9 +39,9 @@ export const routes: Routes = [
       { path: 'unduhmantu/bikinlink', title: 'Anis & Mantep', component: GuestManagementComponent2, },
        // Catch all invalid routes and redirect to 404
        {
-        path: 'unduh-mantu/tamu',
+        path: 'unduh-mantu/:guestName',
         children: [
-          { path: ':guestName', title: 'Anis & Mantep', component: AlvyyatunMainComponent2 },
+          { path: '', title: 'Anis & Mantep', component: AlvyyatunMainComponent2 },
         ]
       },
 
