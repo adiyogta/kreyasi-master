@@ -250,7 +250,6 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
     this.error = null;
     
     this.fetchGuests().pipe(
-      retry(2), // Retry 2 times on failure
       tap(guests => {
         this.updateGuestList(guests);
         this.error = null;
@@ -260,7 +259,7 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
       }),
       catchError(err => {
         console.error('Load guests error:', err);
-        this.error = 'Gagal memuat data. Periksa koneksi internet Anda.';
+        this.error = `Gagal memuat data: ${err.message || 'Periksa koneksi internet'}`;
         this.isLoading = false;
         this.cdr.detectChanges();
         return of([]);
@@ -269,12 +268,11 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private startAutoRefresh(): void {
-    // Reduced interval to 15 seconds for more frequent updates
-    this.updateSubscription = interval(15000).pipe(
+    // Kembali ke interval 30 detik untuk stabilitas
+    this.updateSubscription = interval(30000).pipe(
       switchMap(() => {
         if (this.isLoading) return of([]); // Skip if already loading
         return this.fetchGuests().pipe(
-          retry(1), // Retry once for auto refresh
           catchError(error => {
             console.error('Auto refresh error:', error);
             return of([]);
@@ -282,7 +280,7 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
         );
       })
     ).subscribe(guests => {
-      if (guests.length >= 0) { // Allow empty arrays to update
+      if (guests.length > 0) { // Only update if we have data
         this.updateGuestList(guests);
         this.error = null;
         this.lastUpdateTime = new Date();
@@ -292,24 +290,27 @@ export class GuestListComponent implements OnInit, AfterViewInit, OnDestroy {
   }
 
   private fetchGuests(): Observable<Guest[]> {
-    // Multiple cache-busting strategies
+    // Simple cache-busting dengan timestamp saja
     const timestamp = Date.now();
-    const randomParam = Math.random().toString(36).substring(7);
-    const url = `${this.apiUrl}?t=${timestamp}&r=${randomParam}&_cb=${timestamp}`;
+    const url = `${this.apiUrl}?t=${timestamp}`;
     
-    // Headers to prevent caching
-    const headers = new HttpHeaders({
-      'Cache-Control': 'no-cache, no-store, must-revalidate',
-      'Pragma': 'no-cache',
-      'Expires': '0'
-    });
-
     console.log('Fetching from URL:', url); // Debug log
     
-    return this.http.get<{ data: Guest[] }>(url, { headers }).pipe(
+    return this.http.get<any>(url).pipe(
       map(response => {
         console.log('API Response:', response); // Debug log
-        return response.data || [];
+        
+        // Handle berbagai format response dari Google Apps Script
+        if (response && response.data && Array.isArray(response.data)) {
+          return response.data;
+        } else if (Array.isArray(response)) {
+          return response;
+        } else if (response && Array.isArray(response.result)) {
+          return response.result;
+        } else {
+          console.warn('Unexpected API response format:', response);
+          return [];
+        }
       }),
       catchError(error => {
         console.error('API Error Details:', error);
