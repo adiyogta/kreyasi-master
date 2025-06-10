@@ -25,7 +25,8 @@
       <img 
         src="https://static.wixstatic.com/media/76d2f5_9bdd4d0081d941a2b3db9c18474d1ac3~mv2.gif"
         alt="flower decoration" style="mix-blend-mode: multiply;"
-        class="w-12 md:w-24 h-auto "
+        class="w-12 md:w-24 h-auto img-loading"
+        (load)="onImageLoad($event)"
       />
     </div>
   </section>
@@ -37,9 +38,10 @@
         <div class="w-6/12 md:w-2/2 mb-8 lg:mb-0 lg:mr-8 opacity-0" #animatedItem>
           <div class="skeleton-loader w-full h-0 pb-[75%] rounded-lg"></div>
           <img 
-            src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749507488/IMG_8162_-_Anis_Setianingsih_ljxeqc.jpg" 
+            src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749533809/IMG_8162_-_Anis_Setianingsih_axubej.jpg" 
             alt="Pre-wedding photo" 
-            class="w-full h-auto rounded-lg shadow-lg "
+            class="w-full h-auto rounded-lg shadow-lg img-loading" 
+            (load)="onImageLoad($event)"
           >
         </div>
       
@@ -66,9 +68,10 @@
             <div class="p-2 text-center bg-card opacity-0" #animatedItem >
               <div class="skeleton-loader w-2/3 md:w-3/4 h-0 pb-[75%] rounded-full mx-auto mb-8 md:mb-16"></div>
               <img 
-                src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749506994/anis_ez7lt8.jpg" 
+                src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749573287/anis_q1y2au.jpg" 
                 alt="Foto Profil Alvyyatun" 
-                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md "
+                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md img-loading" 
+                (load)="onImageLoad($event)"
               >
                 <h2 class="text-4xl md:text-6xl font-script mb-2 text-[#432818] opacity-0" #animatedItem>Anis</h2>
                 <h3 class="text-2xl md:text-3xl  font-script mb-2 opacity-0" #animatedItem>Anis Setia Ningsih, S.Pd</h3>
@@ -83,9 +86,10 @@
             <div class="p-2 text-center bg-card opacity-0" #animatedItem >
               <div class="skeleton-loader w-2/3 md:w-3/4 h-0 pb-[75%] rounded-full mx-auto mb-8 md:mb-16"></div>
               <img 
-                src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749506993/mantep_vagk41.jpg" 
+                src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749573273/mantep_s3lfzj.jpg" 
                 alt="Foto Profil Mantep" 
-                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md "
+                class="w-2/3 md:w-3/4 rounded-full mx-auto mb-8 md:mb-16 shadow-md img-loading" 
+                (load)="onImageLoad($event)"
               >
                 <h2 class="text-4xl md:text-6xl font-script mb-2 text-[#432818] opacity-0" #animatedItem>Mantep</h2>
                 <h3 class="text-2xl md:text-3xl  font-script mb-2 opacity-0" #animatedItem>Mantep Supriyanto</h3>
@@ -158,7 +162,8 @@
   <img 
     [src]="photo.thumbnail" 
     [alt]="photo.title" 
-    class="w-full h-full object-cover rounded-lg"
+    class="w-full h-full object-cover rounded-lg img-loading"
+    (load)="onImageLoad($event)"
     decoding="async"
     fetchpriority="low"
   >
@@ -323,9 +328,10 @@
       <div class=" mb-4 md:mb-6 p-2 md:p-4">
         <div class="skeleton-loader w-full aspect-[4/3] rounded-lg max-h-[80vh] md:max-h-[60vh]"></div>
         <img 
-          src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749507488/IMG_8145_-_Anis_Setianingsih_a1f24h.jpg" 
+          src="https://res.cloudinary.com/dxeyja0ob/image/upload/v1749533809/IMG_8149_-_Anis_Setianingsih_uhbp3b.jpg" 
           alt="Pre-wedding photo" 
-          class="w-full aspect-[4/3] object-cover rounded-lg shadow-lg opacity-0 max-h-[80vh] md:max-h-[60vh] "
+          class="w-full aspect-[4/3] object-cover rounded-lg shadow-lg opacity-0 max-h-[80vh] md:max-h-[60vh] img-loading" 
+          (load)="onImageLoad($event)" 
           #animatedItem
         >
        </div>
@@ -359,7 +365,7 @@
               <div class="flex justify-center">
                 <div 
                   class="w-40 h-40 bg-no-repeat bg-cover bg-center rounded-t-full border-4 border-[#432818]/20"
-                  style="background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749507488/IMG_8149_-_Anis_Setianingsih_ehssg5.jpg')"
+                  style="background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749533809/IMG_8145_-_Anis_Setianingsih_zbbxvd.jpg')"
                 ></div>
               </div>
   
@@ -401,7 +407,7 @@
               <div class="w-full flex justify-center items-center">
                 <div 
                   class="w-80 h-80 bg-no-repeat bg-cover bg-center rounded-full"
-                  style="background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749507488/IMG_8149_-_Anis_Setianingsih_ehssg5.jpg')"
+                  style="background-image: url('https://res.cloudinary.com/dxeyja0ob/image/upload/v1749533809/IMG_8145_-_Anis_Setianingsih_zbbxvd.jpg')"
                 ></div>
               </div>
             </div>
