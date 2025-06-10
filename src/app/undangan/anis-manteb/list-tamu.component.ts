@@ -116,7 +116,7 @@ export class GuestManagementComponent2 implements OnInit, OnDestroy {
     guests$: Observable<Guest[]> = this.guestsSubject.asObservable();
     error: string | null = null;
     private updateSubscription!: Subscription;
-    private readonly SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzmX6wWFcHdbs__7JEPqt1Fr1kYPxMc2_QxBlmnwxGmvGjTKCv5UJNAy2BdJWXF_JS65A/exec';
+    private readonly SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbyAWLqtaCFWtAGSuZLFjkQsdFidLMd49mwH815xq5gn61NwdnCoAm5DNwEcNWCSgPHk/exec';
   
     isModalOpen = false;
     modalTitle = '';
